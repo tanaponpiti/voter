@@ -49,7 +49,8 @@ class _LoginScreen extends State<LoginScreen> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => const HomeScreen(),
-                        settings: const RouteSettings(name: 'vote')),
+                        // settings: const RouteSettings(name: 'vote')
+                    ),
                   );
                 }
               },

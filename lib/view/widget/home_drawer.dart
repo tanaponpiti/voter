@@ -6,16 +6,13 @@ import 'package:voter_app/view/home/vote_screen.dart';
 import 'package:voter_app/view/login/login_screen.dart';
 
 class HomeDrawer extends StatefulWidget {
-
   final Function(String) onMenuChange;
 
   const HomeDrawer({Key? key, required this.onMenuChange}) : super(key: key);
 
-
   @override
   State<HomeDrawer> createState() => _HomeDrawerState();
 }
-
 
 class _HomeDrawerState extends State<HomeDrawer> {
   @override
@@ -62,17 +59,16 @@ class _HomeDrawerState extends State<HomeDrawer> {
               leading: const Icon(Icons.logout), // LogoutIcon
               title: const Text('Logout'),
               onTap: () async {
-                final authProvider = Provider.of<AuthenticationProvider>(
-                    context, listen: false);
+                final authProvider =
+                    Provider.of<AuthenticationProvider>(context, listen: false);
                 await authProvider.logout();
-                if (mounted && ModalRoute
-                    .of(context)
-                    ?.isCurrent == true) {
+                if (mounted && ModalRoute.of(context)?.isCurrent == true) {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const LoginScreen(),
-                        settings: const RouteSettings(name: LoginScreen.id)),
+                      builder: (context) => const LoginScreen(),
+                      // settings: const RouteSettings(name: LoginScreen.id)
+                    ),
                   );
                 }
               },

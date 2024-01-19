@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:voter_app/model/vote_choice.dart';
 
 class VoteChoiceCard extends StatelessWidget {
-  final String name;
-  final String description;
-  final int voteCount;
+  final int index;
+  final VoteChoice voteChoice;
+  final Function(VoteChoice)? onChoiceTap;
 
   const VoteChoiceCard(
       {super.key,
-      required this.name,
-      required this.description,
-      this.voteCount = 0});
+      required this.voteChoice,
+      this.onChoiceTap,
+      required this.index});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,7 @@ class VoteChoiceCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
-                                name,
+                                voteChoice.name,
                                 style: const TextStyle(
                                     fontSize: 24, fontWeight: FontWeight.bold),
                                 overflow: TextOverflow.ellipsis,
@@ -53,7 +54,7 @@ class VoteChoiceCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
-                                voteCount.toString(),
+                                voteChoice.voteCount.toString(),
                                 style: const TextStyle(
                                     fontSize: 24, fontWeight: FontWeight.bold),
                                 textAlign: TextAlign.right,
@@ -66,13 +67,14 @@ class VoteChoiceCard extends StatelessWidget {
                       const SizedBox(height: 10),
                       Expanded(
                         child: Container(
+                          width: double.infinity,
                           padding: const EdgeInsets.all(8.0),
                           decoration: BoxDecoration(
                             color: Colors.grey[300],
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            description,
+                            voteChoice.description,
                             style: const TextStyle(fontSize: 14),
                             softWrap: true,
                             maxLines: null,
@@ -88,7 +90,12 @@ class VoteChoiceCard extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8.0), // Rounded corners
               child: InkWell(
-                onTap: () {},
+                onTap: () {
+                  var callback = onChoiceTap;
+                  if (callback != null) {
+                    callback(voteChoice);
+                  }
+                },
               ),
             ),
           ))

@@ -38,7 +38,6 @@ dependencies:
   provider: ^6.1.1
   flutter_secure_storage: ^9.0.0
   shared_preferences: ^2.2.2
-  fluid_dialog: ^2.0.0
 
 dev_dependencies:
   flutter_test:

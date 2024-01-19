@@ -17,13 +17,13 @@ Route<dynamic> onGenerateRoute(RouteSettings settings, BuildContext context) {
   if (!authProvider.isLoggedIn && settings.name != 'login') {
     return MaterialPageRoute(
       builder: (context) => const LoginScreen(),
-      settings: const RouteSettings(name: 'login'),
+      // settings: const RouteSettings(name: 'login'),
     );
   }
   if (authProvider.isLoggedIn && settings.name == 'login') {
     return MaterialPageRoute(
       builder: (context) => const HomeScreen(),
-      settings: const RouteSettings(name: 'vote'),
+      // settings: const RouteSettings(name: 'vote'),
     );
   }
 
@@ -45,6 +45,6 @@ Route<dynamic> onGenerateRoute(RouteSettings settings, BuildContext context) {
   }
   return MaterialPageRoute(
     builder: (context) => const LoginScreen(),
-    settings: const RouteSettings(name: 'login'),
+    // settings: const RouteSettings(name: 'login'),
   );
 }
