@@ -13,69 +13,85 @@ class VoteChoiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(10.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black54),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Expanded(
-                flex: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
+    return Card(
+        elevation: 8,
+        child: Stack(children: [
+          Positioned.fill(
+              child: Container(
+                  padding: const EdgeInsets.all(10.0),
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(
-                    name,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                flex: 3,
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    voteCount.toString(),
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.right,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              )
-            ],
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(description,
-                style: const TextStyle(fontSize: 14),
-                softWrap: true,
-                maxLines: null,
-                // overflow: TextOverflow.ellipsis,
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Expanded(
+                            flex: 8,
+                            child: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                name,
+                                style: const TextStyle(
+                                    fontSize: 24, fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            flex: 3,
+                            child: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                voteCount.toString(),
+                                style: const TextStyle(
+                                    fontSize: 24, fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.right,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            description,
+                            style: const TextStyle(fontSize: 14),
+                            softWrap: true,
+                            maxLines: null,
+                            // overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ))),
+          Positioned.fill(
+              child: Material(
+            color: Colors.transparent,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0), // Rounded corners
+              child: InkWell(
+                onTap: () {},
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ))
+        ]));
   }
 }

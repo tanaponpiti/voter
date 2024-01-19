@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
           useMaterial3: true,
         ),
-        home: AuthWrapper(),
+        home: const AuthWrapper(),
         onGenerateRoute: (settings) => onGenerateRoute(settings, context));
   }
 }

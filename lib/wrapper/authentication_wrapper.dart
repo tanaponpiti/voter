@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:voter_app/provider/authentication_provider.dart';
+import 'package:voter_app/view/home/home_screen.dart';
 import 'package:voter_app/view/loading/loading_screen.dart';
 import 'package:voter_app/view/login/login_screen.dart';
-import 'package:voter_app/view/vote/vote_screen.dart';
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -20,7 +20,7 @@ class AuthWrapper extends StatelessWidget {
         // Check connection state and snapshot data to decide the initial page
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.data == true) {
-            return const VoteScreen();
+            return const HomeScreen();
           } else {
             return const LoginScreen();
           }

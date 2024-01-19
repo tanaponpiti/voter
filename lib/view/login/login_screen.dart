@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:voter_app/provider/authentication_provider.dart';
-import 'package:voter_app/view/vote/vote_screen.dart';
+import 'package:voter_app/view/home/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String id = "login";
@@ -47,7 +47,9 @@ class _LoginScreen extends State<LoginScreen> {
                 if (mounted && ModalRoute.of(context)?.isCurrent == true) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const VoteScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const HomeScreen(),
+                        settings: const RouteSettings(name: 'vote')),
                   );
                 }
               },
