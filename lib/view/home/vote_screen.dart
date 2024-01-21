@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:voter_app/model/vote_choice.dart';
+import 'package:voter_app/provider/vote_choice_provider.dart';
 import 'package:voter_app/view/widget/confirm_voting_dialog.dart';
 import 'package:voter_app/view/widget/vote_choice_card.dart';
+import 'package:voter_app/view/widget/vote_choice_empty.dart';
 
 class VoteScreen extends StatefulWidget {
   static const String id = "vote";
@@ -14,7 +17,8 @@ class VoteScreen extends StatefulWidget {
 }
 
 class _VoteScreenState extends State<VoteScreen> {
-  late List<VoteChoice> voteChoiceList;
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
 
   _VoteScreenState();
 
@@ -27,37 +31,26 @@ class _VoteScreenState extends State<VoteScreen> {
         });
   }
 
-  _onVoteChoiceConfirm(VoteChoice voteChoice) {
-    setState(() {
-      voteChoice.voteCount++;
-      voteChoiceList.sort((a, b) => b.voteCount - a.voteCount);
-    });
-  }
-
-  List<VoteChoice> generateMockVoteChoices() {
-    List<VoteChoice> voteChoices = [];
-    for (int i = 1; i <= 10; i++) {
-      voteChoices.add(VoteChoice(
-        id: 'choice$i',
-        voteCount: i * 10, // Just example data
-        name: 'Option $i',
-        description: 'Description for option $i.',
-      ));
-    }
-    return voteChoices;
+  Future<bool> _onVoteChoiceConfirm(VoteChoice voteChoice) async {
+    var voteChoiceProvider =
+        Provider.of<VoteChoiceProvider>(context, listen: false);
+    return voteChoiceProvider.voteFor(voteChoice);
   }
 
   @override
   void initState() {
     super.initState();
-    setState(() {
-      voteChoiceList = generateMockVoteChoices();
-      voteChoiceList.sort((a, b) => b.voteCount - a.voteCount);
+    // Schedule a callback for the end of this frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshIndicatorKey.currentState?.show();
+      // final voteChoiceProvider =
+      //     Provider.of<VoteChoiceProvider>(context, listen: false);
+      // voteChoiceProvider.reloadVoteChoice();
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildVotingList(
+      BuildContext context, VoteChoiceProvider voteChoiceProvider) {
     const double itemWidth = 300;
     const double spacing = 10;
     int numColumns =
@@ -70,14 +63,37 @@ class _VoteScreenState extends State<VoteScreen> {
         crossAxisSpacing: spacing,
         mainAxisSpacing: spacing,
       ),
-      itemCount: voteChoiceList.length,
+      itemCount: voteChoiceProvider.voteChoiceList.length,
       itemBuilder: (context, index) {
         return VoteChoiceCard(
           index: index,
-          voteChoice: voteChoiceList[index],
+          voteChoice: voteChoiceProvider.voteChoiceList[index],
           onChoiceTap: _onVoteChoiceClick,
         );
       },
     );
+  }
+
+  Widget _buildEmptyVotingList(BuildContext context) {
+    return VoteChoiceEmpty(onCreateNewChoiceTap: () {
+      // Navigator.of(context).push(
+      //   MaterialPageRoute(builder: (context) => const SecondRoute()),
+      // );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var voteChoiceProvider = Provider.of<VoteChoiceProvider>(context);
+    return RefreshIndicator(
+        key: _refreshIndicatorKey,
+        onRefresh: () async {
+          await voteChoiceProvider.reloadVoteChoice();
+        },
+        child: Container(
+            color: const Color.fromARGB(255, 238, 238, 238),
+            child: voteChoiceProvider.voteChoiceList.isEmpty
+                ? _buildEmptyVotingList(context)
+                : _buildVotingList(context, voteChoiceProvider)));
   }
 }
