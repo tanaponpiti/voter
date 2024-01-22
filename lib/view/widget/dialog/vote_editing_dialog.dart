@@ -1,38 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:voter_app/utility/toast.dart';
+import '../../../model/vote_choice.dart';
 
-import '../../model/vote_choice.dart';
-
-class ConfirmVotingDialog extends StatefulWidget {
+class VoteEditingDialog extends StatefulWidget {
   final VoteChoice voteChoice;
   final Function(VoteChoice)? onChoiceVote;
 
-  const ConfirmVotingDialog(
-      {super.key, required this.voteChoice, this.onChoiceVote});
+  const VoteEditingDialog({super.key, required this.voteChoice, this.onChoiceVote});
 
   @override
-  State<ConfirmVotingDialog> createState() => _ConfirmVotingDialog();
+  State<VoteEditingDialog> createState() => _VoteEditingDialogState();
 }
 
-class _ConfirmVotingDialog extends State<ConfirmVotingDialog> {
+class _VoteEditingDialogState extends State<VoteEditingDialog> {
   bool _loading = false;
+  late TextEditingController _nameController;
+  late TextEditingController _descriptionController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.voteChoice.name);
+    _descriptionController = TextEditingController(text: widget.voteChoice.description);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return AbsorbPointer(
         absorbing: _loading,
         child: AlertDialog(
-          title: const Text("Are you going to vote for..."),
+          title: const Text("Edit your choice"),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Row(children: [
-                  const Text(
-                    "Name:",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(widget.voteChoice.name),
-                ]),
+                const Text(
+                  "Name:",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                TextField(
+                  controller: _nameController,
+                ),
                 const SizedBox(height: 8),
                 const Text(
                   "Description:",
@@ -40,9 +53,11 @@ class _ConfirmVotingDialog extends State<ConfirmVotingDialog> {
                 ),
                 const SizedBox(height: 4),
                 Container(
-                  height: 100, // Adjust the height as needed
-                  child: SingleChildScrollView(
-                    child: Text(widget.voteChoice.description),
+                  height: 100,
+                  child: TextField(
+                    controller: _descriptionController,
+                    maxLines: null,
+                    expands: true,
                   ),
                 ),
               ],
@@ -50,15 +65,17 @@ class _ConfirmVotingDialog extends State<ConfirmVotingDialog> {
           ),
           actions: <Widget>[
             TextButton(
-              child: _loading ? const CircularProgressIndicator() : const Text('Confirm'),
+              child: _loading ? const CircularProgressIndicator() : const Text('Save'),
               onPressed: () async {
                 try {
                   setState(() {
                     _loading = true;
                   });
+                  widget.voteChoice.name = _nameController.text;
+                  widget.voteChoice.description = _descriptionController.text;
                   var callback = widget.onChoiceVote;
                   var success = false;
-                  if(callback!=null){
+                  if (callback != null) {
                     success = await callback(widget.voteChoice);
                   }
                   if (success) {

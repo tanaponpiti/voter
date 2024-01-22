@@ -43,7 +43,7 @@ class VoteChoiceProvider with ChangeNotifier {
     for (int i = 1; i <= 10; i++) {
       voteChoices.add(VoteChoice(
         id: 'choice$i',
-        voteCount: i * 1, // Just example data
+        voteCount: 0, // Just example data
         name: 'Option $i',
         description: 'Description for option $i.',
       ));
@@ -60,6 +60,37 @@ class VoteChoiceProvider with ChangeNotifier {
       await Future.delayed(Duration(seconds: 2));
       targetVoteChoice.voteCount++;
       _voteChoiceList.sort((a, b) => b.voteCount - a.voteCount);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      Toaster.error("Unable to vote. Please try again later");
+      return false;
+    }
+  }
+
+  Future<bool> editVote(VoteChoice voteChoice) async {
+    try {
+      var voteId = voteChoice.id;
+      var targetVoteChoice =
+          _voteChoiceList.firstWhere((element) => element.id == voteId);
+      //TODO send actual request to update vote on server
+      await Future.delayed(Duration(seconds: 2));
+      targetVoteChoice.name = voteChoice.name;
+      targetVoteChoice.description = voteChoice.description;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      Toaster.error("Unable to vote. Please try again later");
+      return false;
+    }
+  }
+
+  Future<bool> deleteVote(VoteChoice voteChoice) async {
+    try {
+      var voteId = voteChoice.id;
+      _voteChoiceList.removeWhere((element) => element.id == voteId);
+      //TODO send actual request to update vote on server
+      await Future.delayed(Duration(seconds: 2));
       notifyListeners();
       return true;
     } catch (e) {

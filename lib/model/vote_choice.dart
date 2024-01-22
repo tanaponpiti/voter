@@ -1,8 +1,8 @@
 class VoteChoice {
   final String id;
   int voteCount;
-  final String name;
-  final String description;
+  String name;
+  String description;
 
   VoteChoice({
     required this.id,

@@ -88,7 +88,7 @@ class VoteChoiceCard extends StatelessWidget {
               child: Material(
             color: Colors.transparent,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8.0), // Rounded corners
+              borderRadius: BorderRadius.circular(12.0),
               child: InkWell(
                 onTap: () {
                   var callback = onChoiceTap;

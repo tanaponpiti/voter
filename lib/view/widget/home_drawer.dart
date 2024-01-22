@@ -35,7 +35,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
             child: ListView(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.thumb_up), // VoteIcon
+                  leading: const Icon(Icons.thumb_up),
                   title: const Text('Vote'),
                   onTap: () {
                     widget.onMenuChange(VoteScreen.id);
@@ -43,7 +43,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.settings), // SettingIcon
+                  leading: const Icon(Icons.settings),
                   title: const Text('Settings'),
                   onTap: () {
                     widget.onMenuChange(SettingScreen.id);
@@ -56,7 +56,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
           Align(
             alignment: FractionalOffset.bottomCenter,
             child: ListTile(
-              leading: const Icon(Icons.logout), // LogoutIcon
+              leading: const Icon(Icons.logout),
               title: const Text('Logout'),
               onTap: () async {
                 final authProvider =

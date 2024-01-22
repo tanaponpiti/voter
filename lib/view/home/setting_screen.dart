@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:settings_ui/settings_ui.dart';
+import 'package:voter_app/view/home/vote_editing_screen.dart';
 
 class SettingScreen extends StatefulWidget {
   static const String id = "setting";
@@ -23,7 +24,13 @@ class _SettingScreenState extends State<SettingScreen> {
           title: const Text('Common'),
           tiles: <SettingsTile>[
             SettingsTile.navigation(
-              onPressed: (context) {},
+              onPressed: (context) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const VoteEditingScreen()),
+                );
+              },
               leading: const Icon(Icons.edit),
               title: const Text('Edit vote choice'),
             ),

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:voter_app/model/vote_choice.dart';
 import 'package:voter_app/provider/vote_choice_provider.dart';
-import 'package:voter_app/view/widget/confirm_voting_dialog.dart';
+import 'package:voter_app/view/home/vote_editing_screen.dart';
+import 'package:voter_app/view/widget/dialog/confirm_voting_dialog.dart';
 import 'package:voter_app/view/widget/vote_choice_card.dart';
 import 'package:voter_app/view/widget/vote_choice_empty.dart';
 
@@ -76,9 +77,9 @@ class _VoteScreenState extends State<VoteScreen> {
 
   Widget _buildEmptyVotingList(BuildContext context) {
     return VoteChoiceEmpty(onCreateNewChoiceTap: () {
-      // Navigator.of(context).push(
-      //   MaterialPageRoute(builder: (context) => const SecondRoute()),
-      // );
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const VoteEditingScreen()),
+      );
     });
   }
 
