@@ -1,0 +1,17 @@
+version: '3.1'
+
+services:
+  mongodb:
+    image: mongo:6.0.13
+    container_name: mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "voter-root"
+      MONGO_INITDB_ROOT_PASSWORD: "BKIA9ND7lLQnZUBcYzdXyKku7"
+      MONGO_INITDB_DATABASE: "voter"
+    ports:
+      - "27017:27017"
+    volumes:
+      - voter_mongodb_data:/data/db
+volumes:
+  voter_mongodb_data:
