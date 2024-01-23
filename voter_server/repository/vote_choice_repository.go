@@ -52,12 +52,17 @@ func (r *VoteChoiceRepository) EnsureVoteChoiceIndex() error {
 	return nil
 }
 
-func (r *VoteChoiceRepository) InsertVoteChoice(vc model.VoteChoice) (*mongo.InsertOneResult, error) {
+func (r *VoteChoiceRepository) InsertVoteChoice(vc model.VoteChoiceInsertData) (*mongo.InsertOneResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	vc.CreatedAt = time.Now()
-	vc.UpdatedAt = time.Now()
-	result, err := r.collection.InsertOne(ctx, vc)
+	currentTime := time.Now()
+	choice := model.VoteChoice{
+		Name:        vc.Name,
+		Description: vc.Description,
+		CreatedAt:   currentTime,
+		UpdatedAt:   currentTime,
+	}
+	result, err := r.collection.InsertOne(ctx, choice)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +156,7 @@ func (r *VoteChoiceRepository) GetVoteChoicesPage(pageSize int, pageNum int, nam
 	return voteChoices, total, nil
 }
 
-func (r *VoteChoiceRepository) UpdateVoteChoice(id string, updateData bson.M) error {
+func (r *VoteChoiceRepository) UpdateVoteChoice(id string, updateData model.VoteChoiceUpdateData) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -160,9 +165,23 @@ func (r *VoteChoiceRepository) UpdateVoteChoice(id string, updateData bson.M) er
 		return err
 	}
 
-	update := bson.M{
-		"$set": updateData,
+	update := bson.M{}
+	if updateData.Name != nil {
+		update["$set"] = bson.M{"name": *updateData.Name}
 	}
+	if updateData.Description != nil {
+		// If $set already initialized, add to it instead of overwriting
+		if _, ok := update["$set"]; ok {
+			update["$set"].(bson.M)["description"] = *updateData.Description
+		} else {
+			update["$set"] = bson.M{"description": *updateData.Description}
+		}
+	}
+
+	if len(update) == 0 {
+		return nil
+	}
+
 	_, err = r.collection.UpdateOne(ctx, bson.M{"_id": objectId}, update)
 	if err != nil {
 		return err
@@ -183,4 +202,14 @@ func (r *VoteChoiceRepository) DeleteVoteChoice(id string) error {
 		return err
 	}
 	return nil
+}
+
+func (r *VoteLogRepository) DeleteAllVoteChoice() (int64, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	result, err := r.collection.DeleteMany(ctx, bson.M{})
+	if err != nil {
+		return 0, err
+	}
+	return result.DeletedCount, nil
 }

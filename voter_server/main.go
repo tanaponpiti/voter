@@ -25,6 +25,10 @@ func initRepository() (err error) {
 	if err != nil {
 		return err
 	}
+	err = repository.InitVoteLogRepository()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

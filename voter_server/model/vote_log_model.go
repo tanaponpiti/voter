@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const VoteLogCollectionName = "vote_choice"
+const VoteLogCollectionName = "vote_log"
 
 type VoteLog struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty"`
@@ -13,4 +13,9 @@ type VoteLog struct {
 	VoterUserId string             `bson:"voter_user_id" validate:"required"`
 	CreatedAt   time.Time          `bson:"created_at"`
 	UpdatedAt   time.Time          `bson:"updated_at"`
+}
+
+type VoteScoreSummary struct {
+	VoteId    string `bson:"voteId"`
+	VoteScore int    `bson:"voteScore"`
 }

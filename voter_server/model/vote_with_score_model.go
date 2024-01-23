@@ -5,22 +5,11 @@ import (
 	"time"
 )
 
-const VoteChoiceCollectionName = "vote_choice"
-
-type VoteChoice struct {
+type VoteWithScore struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty"`
 	Name        string             `bson:"name" validate:"required"`
 	Description string             `bson:"description"`
+	Score       int                `bson:"score"`
 	CreatedAt   time.Time          `bson:"created_at"`
 	UpdatedAt   time.Time          `bson:"updated_at"`
-}
-
-type VoteChoiceInsertData struct {
-	Name        string `bson:"name" validate:"required"`
-	Description string `bson:"description"`
-}
-
-type VoteChoiceUpdateData struct {
-	Name        *string `bson:"name"`
-	Description *string `bson:"description"`
 }
