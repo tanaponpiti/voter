@@ -14,7 +14,17 @@ import (
 	"time"
 )
 
-var UserRepositoryInstance *UserRepository
+type IUserRepository interface {
+	EnsureUserIndex() error
+	InsertUser(user model.User) (*mongo.InsertOneResult, error)
+	GetUser(id string) (*model.User, error)
+	GetUserByUsername(username string) (*model.User, error)
+	UpdateUser(id string, updateData model.User) error
+	DeleteUser(id string) error
+	EnsureTestUsers() error
+}
+
+var UserRepositoryInstance IUserRepository
 
 type UserRepository struct {
 	collection *mongo.Collection
@@ -161,6 +171,7 @@ func (r *UserRepository) EnsureTestUsers() error {
 	needToCreate := 10 - existingCount
 	for i := 1; i <= int(needToCreate); i++ {
 		testUser := model.User{
+			Name:     fmt.Sprintf("Test User %d", existingCount+int64(i)),
 			Username: fmt.Sprintf("testuser%d", existingCount+int64(i)),
 			Password: "testpassword",
 		}

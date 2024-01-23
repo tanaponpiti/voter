@@ -12,7 +12,15 @@ import (
 	"time"
 )
 
-var TokenRepositoryInstance *TokenRepository
+type ITokenRepository interface {
+	EnsureTokenIndex() error
+	GetSingleToken(id string) (*model.Token, error)
+	DeleteToken(id string) error
+	DeleteTokenByToken(token string) error
+	InsertToken(jwtToken string, userId string) (*mongo.InsertOneResult, error)
+}
+
+var TokenRepositoryInstance ITokenRepository
 
 type TokenRepository struct {
 	collection *mongo.Collection
@@ -36,15 +44,21 @@ func (r *TokenRepository) EnsureTokenIndex() error {
 	defer cancel()
 
 	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
-	indexModel := mongo.IndexModel{
-		Keys: bson.M{"token": 1}, // index in ascending order
-		Options: options.Index().SetUnique(true).SetCollation(&options.Collation{
-			Locale:   "en",
-			Strength: 2, // level 2 means case-insensitive
-		}),
+	uniqueIndexModel := mongo.IndexModel{
+		Keys:    bson.M{"token": 1}, // index in ascending order
+		Options: options.Index().SetUnique(true),
+	}
+	_, err := r.collection.Indexes().CreateOne(ctx, uniqueIndexModel, opts)
+	if err != nil {
+		return err
 	}
 
-	_, err := r.collection.Indexes().CreateOne(ctx, indexModel, opts)
+	ttl := int32(config.TokenExpireHour() * 3600)
+	createAtExpireModel := mongo.IndexModel{
+		Keys:    bson.M{"createdAt": 1},
+		Options: options.Index().SetExpireAfterSeconds(ttl),
+	}
+	_, err = r.collection.Indexes().CreateOne(ctx, createAtExpireModel, opts)
 	if err != nil {
 		return err
 	}

@@ -2,25 +2,24 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/tanaponpiti/voter/voter_server/repository"
 	"github.com/tanaponpiti/voter/voter_server/service"
 	"net/http"
 )
 
 func Me(c *gin.Context) {
-	userId, exist := c.Get("userID")
+	userId, exist := c.Get("userId")
 	if !exist {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Authorization header"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Authorization header"})
 		return
 	}
 	userIdStr, ok := userId.(string)
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Authorization header"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Authorization header"})
 		return
 	}
-	user, err := repository.UserRepositoryInstance.GetUser(userIdStr)
+	user, err := service.GetUserInfoFromId(userIdStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Authorization header"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Authorization header"})
 		return
 	}
 	c.JSON(http.StatusOK, user)

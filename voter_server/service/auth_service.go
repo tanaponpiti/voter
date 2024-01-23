@@ -14,13 +14,11 @@ import (
 	"time"
 )
 
-var jwtSecret = []byte(config.JWTSecret())
-var tokenExpiryDuration = time.Hour * time.Duration(config.TokenExpireHour())
-
 func generateToken(userID string) (string, error) {
+	jwtSecret := []byte(config.JWTSecret())
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":  userID,
-		"exp": time.Now().Add(tokenExpiryDuration).Unix(),
+		"exp": time.Now().Add(time.Hour * time.Duration(config.TokenExpireHour())).Unix(),
 	})
 	jwtToken, err := token.SignedString(jwtSecret)
 	if err != nil {
@@ -34,6 +32,7 @@ func generateToken(userID string) (string, error) {
 }
 
 func validateToken(tokenString string) (*jwt.Token, error) {
+	jwtSecret := []byte(config.JWTSecret())
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method")
@@ -50,6 +49,7 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString, err := GetTokenFromBearerHeader(c)
 		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
 		token, err := validateToken(tokenString)
@@ -59,7 +59,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			c.Set("userID", claims["id"])
+			c.Set("userId", claims["id"])
 		} else {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
@@ -69,20 +69,8 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func GetUserInfoFromToken(tokenString string) (user *model.User, err error) {
-	token, err := validateToken(tokenString)
-	if err != nil {
-		return nil, errors.New("invalid token")
-	}
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || !token.Valid {
-		return nil, errors.New("invalid token")
-	}
-	userID, ok := claims["id"].(string)
-	if !ok {
-		return nil, errors.New("invalid token claims: user id not found")
-	}
-	user, err = repository.UserRepositoryInstance.GetUser(userID)
+func GetUserInfoFromId(userId string) (user *model.User, err error) {
+	user, err = repository.UserRepositoryInstance.GetUser(userId)
 	if err != nil {
 		return nil, fmt.Errorf("user not found: %v", err)
 	}
@@ -95,7 +83,7 @@ func Login(username string, password string) (jwtToken string, err error) {
 		return "", errors.New("invalid credential")
 	}
 	if utility.CheckPasswordHash(password, user.Password) {
-		return generateToken(user.ID.String())
+		return generateToken(user.ID.Hex())
 	} else {
 		return "", errors.New("invalid credential")
 	}
