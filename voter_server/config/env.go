@@ -8,9 +8,11 @@ import (
 )
 
 func Init() (err error) {
-	err = godotenv.Load()
-	if err != nil {
-		return err
+	if os.Getenv("ENVIRONMENT") != "production" {
+		err = godotenv.Load()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/tanaponpiti/voter/voter_server/database"
 	"github.com/tanaponpiti/voter/voter_server/repository"
 	"github.com/tanaponpiti/voter/voter_server/route"
+	"log"
 )
 
 func initRepository() (err error) {
@@ -35,18 +36,22 @@ func initRepository() (err error) {
 func main() {
 	err := config.Init()
 	if err != nil {
+		log.Println("Error:", err)
 		return
 	}
 	err = database.InitDB()
 	if err != nil {
+		log.Println("Error:", err)
 		return
 	}
 	err = initRepository()
 	if err != nil {
+		log.Println("Error:", err)
 		return
 	}
 	err = repository.UserRepositoryInstance.EnsureTestUsers()
 	if err != nil {
+		log.Println("Error:", err)
 		return
 	}
 
@@ -56,6 +61,7 @@ func main() {
 	route.RegisterAuthRoutes(apiGroup)
 	err = router.Run(":8080")
 	if err != nil {
+		log.Println("Error:", err)
 		return
 	}
 }
