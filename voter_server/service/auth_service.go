@@ -8,6 +8,7 @@ import (
 	"github.com/tanaponpiti/voter/voter_server/config"
 	"github.com/tanaponpiti/voter/voter_server/model"
 	"github.com/tanaponpiti/voter/voter_server/repository"
+	"github.com/tanaponpiti/voter/voter_server/response"
 	"github.com/tanaponpiti/voter/voter_server/utility"
 	"net/http"
 	"strings"
@@ -45,9 +46,25 @@ func validateToken(tokenString string) (*jwt.Token, error) {
 	return token, nil
 }
 
+func getTokenFromBearerHeader(c *gin.Context) (string, error) {
+	authorizationHeader := c.GetHeader("Authorization")
+	if authorizationHeader == "" {
+		return "", errors.New("no Authorization header provided")
+	}
+	const bearerSchema = "Bearer "
+	if !strings.HasPrefix(authorizationHeader, bearerSchema) {
+		return "", errors.New("authorization header format must be 'Bearer {token}'")
+	}
+	token := strings.TrimPrefix(authorizationHeader, bearerSchema)
+	if token == "" {
+		return "", errors.New("no token found in Authorization header")
+	}
+	return token, nil
+}
+
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString, err := GetTokenFromBearerHeader(c)
+		tokenString, err := getTokenFromBearerHeader(c)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
@@ -72,7 +89,7 @@ func AuthMiddleware() gin.HandlerFunc {
 func GetUserInfoFromId(userId string) (user *model.User, err error) {
 	user, err = repository.UserRepositoryInstance.GetUser(userId)
 	if err != nil {
-		return nil, fmt.Errorf("user not found: %v", err)
+		return nil, response.NewErrorResponse("user not found", http.StatusNotFound)
 	}
 	return user, nil
 }
@@ -80,31 +97,15 @@ func GetUserInfoFromId(userId string) (user *model.User, err error) {
 func Login(username string, password string) (jwtToken string, err error) {
 	user, err := repository.UserRepositoryInstance.GetUserByUsername(username)
 	if err != nil {
-		return "", errors.New("invalid credential")
+		return "", response.NewErrorResponse("invalid credential", http.StatusUnauthorized)
 	}
 	if utility.CheckPasswordHash(password, user.Password) {
 		return generateToken(user.ID.Hex())
 	} else {
-		return "", errors.New("invalid credential")
+		return "", response.NewErrorResponse("invalid credential", http.StatusUnauthorized)
 	}
 }
 
 func Logout(token string) (err error) {
 	return repository.TokenRepositoryInstance.DeleteTokenByToken(token)
-}
-
-func GetTokenFromBearerHeader(c *gin.Context) (string, error) {
-	authorizationHeader := c.GetHeader("Authorization")
-	if authorizationHeader == "" {
-		return "", errors.New("no Authorization header provided")
-	}
-	const bearerSchema = "Bearer "
-	if !strings.HasPrefix(authorizationHeader, bearerSchema) {
-		return "", errors.New("authorization header format must be 'Bearer {token}'")
-	}
-	token := strings.TrimPrefix(authorizationHeader, bearerSchema)
-	if token == "" {
-		return "", errors.New("no token found in Authorization header")
-	}
-	return token, nil
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:voter_app/connector/authentication_connector.dart';
 import 'package:voter_app/storage/storage_service.dart';
 
 class AuthenticationProvider with ChangeNotifier {
@@ -22,7 +23,8 @@ class AuthenticationProvider with ChangeNotifier {
     return _isLoggedIn;
   }
 
-  Future<void> login(String token) async {
+  Future<void> login(String username, String password) async {
+    final token = await loginUser(username, password);
     await storageService.write("token", token);
     _isLoggedIn = true;
     notifyListeners();
