@@ -120,6 +120,8 @@ func TestAuthMiddleware(t *testing.T) {
 		repository.TokenRepositoryInstance = mockTokenRepo
 		mockTokenRepo.On("InsertToken", mock.AnythingOfType("string"), userID).Return(&mongo.InsertOneResult{}, nil)
 		token, err := generateToken(userID)
+		mockTokenRepo.On("GetByToken", token).Return(&model.Token{Token: token}, nil)
+
 		assert.Nil(t, err)
 		req.Header.Set("Authorization", "Bearer "+token)
 

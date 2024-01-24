@@ -18,7 +18,7 @@ func (m *TokenRepositoryMock) EnsureTokenIndex() error {
 }
 
 // GetSingleToken mocks the GetSingleToken method
-func (m *TokenRepositoryMock) GetSingleToken(id string) (*model.Token, error) {
+func (m *TokenRepositoryMock) GetByToken(id string) (*model.Token, error) {
 	args := m.Called(id)
 	return args.Get(0).(*model.Token), args.Error(1)
 }

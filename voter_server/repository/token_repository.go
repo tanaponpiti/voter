@@ -14,7 +14,7 @@ import (
 
 type ITokenRepository interface {
 	EnsureTokenIndex() error
-	GetSingleToken(id string) (*model.Token, error)
+	GetByToken(id string) (*model.Token, error)
 	DeleteToken(id string) error
 	DeleteTokenByToken(token string) error
 	InsertToken(jwtToken string, userId string) (*mongo.InsertOneResult, error)
@@ -66,15 +66,11 @@ func (r *TokenRepository) EnsureTokenIndex() error {
 	return nil
 }
 
-func (r *TokenRepository) GetSingleToken(id string) (*model.Token, error) {
+func (r *TokenRepository) GetByToken(tokenString string) (*model.Token, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	var token model.Token
-	objectId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
-	err = r.collection.FindOne(ctx, bson.M{"_id": objectId}).Decode(&token)
+	err := r.collection.FindOne(ctx, bson.M{"token": tokenString}).Decode(&token)
 	if err != nil {
 		return nil, err
 	}
