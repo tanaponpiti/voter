@@ -62,7 +62,7 @@ func DeleteVoteChoice(c *gin.Context) {
 	if complete {
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Vote choice updated successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Vote choice deleted successfully"})
 }
 
 func Vote(c *gin.Context) {
@@ -87,4 +87,13 @@ func Vote(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Vote successfully"})
+}
+
+func DeleteAllVote(c *gin.Context) {
+	err := service.DeleteAllVote()
+	complete := response.HandleErrorResponse(err, c)
+	if complete {
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "All vote deleted successfully"})
 }

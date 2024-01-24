@@ -13,4 +13,5 @@ func RegisterVoteChoiceRoutes(rg *gin.RouterGroup) {
 	voteChoiceGroup.PUT("/:voteChoiceId", controller.UpdateVoteChoice)
 	voteChoiceGroup.DELETE("/:voteChoiceId", controller.DeleteVoteChoice)
 	voteChoiceGroup.POST("/:voteChoiceId/vote", controller.Vote)
+	voteChoiceGroup.DELETE("/delete-all", controller.DeleteAllVote)
 }

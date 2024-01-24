@@ -46,30 +46,34 @@ func GetAllVote() (voteWithScoreList []model.VoteWithScore, err error) {
 	}
 	scores := <-scoresChannel
 	choices := <-choicesChannel
-	voteScoreMap := make(map[string]model.VoteScoreSummary)
-	for _, score := range scores {
-		voteScoreMap[score.VoteId] = score
-	}
-	for _, choice := range choices {
-		voteId := choice.ID.Hex()
-		voteScore, found := voteScoreMap[voteId]
-		voteWithScore := model.VoteWithScore{
-			ID:          choice.ID,
-			Name:        choice.Name,
-			Description: choice.Description,
-			CreatedAt:   choice.CreatedAt,
-			UpdatedAt:   choice.UpdatedAt,
-			Score:       0,
+	if len(choices) > 0 {
+		voteScoreMap := make(map[string]model.VoteScoreSummary)
+		for _, score := range scores {
+			voteScoreMap[score.VoteId] = score
 		}
-		if found {
-			voteWithScore.Score = voteScore.VoteScore
+		for _, choice := range choices {
+			voteId := choice.ID.Hex()
+			voteScore, found := voteScoreMap[voteId]
+			voteWithScore := model.VoteWithScore{
+				ID:          choice.ID,
+				Name:        choice.Name,
+				Description: choice.Description,
+				CreatedAt:   choice.CreatedAt,
+				UpdatedAt:   choice.UpdatedAt,
+				Score:       0,
+			}
+			if found {
+				voteWithScore.Score = voteScore.VoteScore
+			}
+			voteWithScoreList = append(voteWithScoreList, voteWithScore)
 		}
-		voteWithScoreList = append(voteWithScoreList, voteWithScore)
+		sort.Slice(voteWithScoreList, func(i, j int) bool {
+			return voteWithScoreList[j].Score < voteWithScoreList[i].Score
+		})
+		return voteWithScoreList, nil
+	} else {
+		return make([]model.VoteWithScore, 0), nil
 	}
-	sort.Slice(voteWithScoreList, func(i, j int) bool {
-		return voteWithScoreList[j].Score < voteWithScoreList[i].Score
-	})
-	return voteWithScoreList, nil
 }
 
 func CreateVoteChoice(insertData model.VoteChoiceInsertData) (err error) {
@@ -150,6 +154,11 @@ func DeleteVoteChoice(voteChoiceId string) (err error) {
 }
 
 func VoteFor(voterId string, voteChoiceId string) (err error) {
+	//check for vote exist
+	_, err = getVoteChoice(voteChoiceId)
+	if err != nil {
+		return err
+	}
 	//check if given voterId already vote or not
 	user, err := repository.UserRepositoryInstance.GetUser(voterId)
 	if err != nil {
@@ -165,6 +174,18 @@ func VoteFor(voterId string, voteChoiceId string) (err error) {
 	_, err = repository.VoteLogRepositoryInstance.InsertVoteLog(model.VoteLog{VoteId: voteChoiceId, VoterUserId: voterId})
 	if err != nil {
 		return response.NewErrorResponse("unable to vote", http.StatusInternalServerError)
+	}
+	return nil
+}
+
+func DeleteAllVote() (err error) {
+	_, err = repository.VoteChoiceRepositoryInstance.DeleteAllVoteChoice()
+	if err != nil {
+		return response.NewErrorResponse("failed to delete all vote choice", http.StatusInternalServerError)
+	}
+	_, err = repository.VoteLogRepositoryInstance.DeleteAllVoteLogs()
+	if err != nil {
+		return response.NewErrorResponse("failed to delete all vote log", http.StatusInternalServerError)
 	}
 	return nil
 }

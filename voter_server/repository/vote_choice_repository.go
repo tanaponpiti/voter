@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"github.com/tanaponpiti/voter/voter_server/config"
 	"github.com/tanaponpiti/voter/voter_server/database"
 	"github.com/tanaponpiti/voter/voter_server/model"
@@ -101,6 +102,9 @@ func (r *VoteChoiceRepository) GetSingleVoteChoice(id string) (*model.VoteChoice
 	}
 	err = r.collection.FindOne(ctx, bson.M{"_id": objectId}).Decode(&voteChoice)
 	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &voteChoice, nil
@@ -204,7 +208,7 @@ func (r *VoteChoiceRepository) DeleteVoteChoice(id string) error {
 	return nil
 }
 
-func (r *VoteLogRepository) DeleteAllVoteChoice() (int64, error) {
+func (r *VoteChoiceRepository) DeleteAllVoteChoice() (int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	result, err := r.collection.DeleteMany(ctx, bson.M{})
