@@ -1,6 +1,17 @@
 version: '3.1'
 
 services:
+  voter_server:
+    image: ghcr.io/tanaponpiti/voter:latest
+    container_name: voter_server
+    restart: unless-stopped
+    environment:
+      MONGO_URI: "mongodb://voter-root:BKIA9ND7lLQnZUBcYzdXyKku7@mongodb:27017/voter?authSource=admin"
+      MONGO_DB_NAME: "voter"
+      JWT_SECRET: "Y9irmmQhAngz13e69KmU"
+      TOKEN_EXPIRE_HOUR: "24"
+    ports:
+      - "8080:8080"
   mongodb:
     image: mongo:6.0.13
     container_name: mongodb
