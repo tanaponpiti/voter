@@ -19,16 +19,14 @@ class VoteChoice {
       'description': description,
     };
   }
-
-  factory VoteChoice.fromMap(Map<String, dynamic> map) {
+  factory VoteChoice.fromJson(Map<String, dynamic> map) {
     return VoteChoice(
-      id: map['id'],
-      voteCount: map['voteCount'],
-      name: map['name'],
-      description: map['description'],
+      id: map['ID'],
+      voteCount: map['Score'],
+      name: map['Name'],
+      description: map['Description'],
     );
   }
-
   VoteChoice copyWith({
     String? id,
     int? voteCount,

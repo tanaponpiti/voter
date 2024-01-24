@@ -96,7 +96,7 @@ class _VoteEditingScreenState extends State<VoteEditingScreen> {
         return RefreshIndicator(
             key: _refreshIndicatorKey,
             onRefresh: () async {
-              await voteChoiceProvider.reloadVoteChoice();
+              await voteChoiceProvider.reloadVoteChoice(context);
             },
             child: Container(
                 color: const Color.fromARGB(255, 238, 238, 238),

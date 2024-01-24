@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:voter_app/model/user.dart';
 import 'package:voter_app/provider/authentication_provider.dart';
 import 'package:voter_app/view/home/setting_screen.dart';
 import 'package:voter_app/view/home/vote_screen.dart';
@@ -17,17 +18,19 @@ class HomeDrawer extends StatefulWidget {
 class _HomeDrawerState extends State<HomeDrawer> {
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthenticationProvider>(context);
+    final User? user = authProvider.userInfo; // Get the c
     return Drawer(
       child: Column(
         children: <Widget>[
-          const UserAccountsDrawerHeader(
-            accountName: Text("Username"),
-            accountEmail: Text("user@example.com"),
+          UserAccountsDrawerHeader(
+            accountName: Text(user?.name ?? "No Name"),
+            accountEmail: Text(user?.username ?? "No Username"),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
-                "U",
-                style: TextStyle(fontSize: 40.0),
+                user?.name.substring(0, 1) ?? "U",
+                style: const TextStyle(fontSize: 40.0),
               ),
             ),
           ),

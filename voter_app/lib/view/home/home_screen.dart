@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:voter_app/model/user.dart';
+import 'package:voter_app/provider/authentication_provider.dart';
 import 'package:voter_app/view/home/setting_screen.dart';
 import 'package:voter_app/view/home/vote_screen.dart';
 import 'package:voter_app/view/widget/home_drawer.dart';
@@ -28,18 +31,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthenticationProvider>(context);
+    final User? user = authProvider.userInfo; // Get the c
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0.0,
-        title: const Row(
+        title:  Row(
           children: [
             CircleAvatar(
               child: Text(
-                "U",
+                user?.name.substring(0, 1) ?? "U",
               ),
             ),
             SizedBox(width: 5),
-            Text('User Name'),
+            Text(user?.name ?? "No Name"),
           ],
         ),
         centerTitle: false,

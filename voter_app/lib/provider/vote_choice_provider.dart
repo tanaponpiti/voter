@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:voter_app/connector/vote_connector.dart';
+import 'package:voter_app/exception/duplicate_vote_exception.dart';
+import 'package:voter_app/exception/invalid_login_exception.dart';
 import 'package:voter_app/model/vote_choice.dart';
-import 'package:voter_app/storage/storage_service.dart';
+import 'package:voter_app/provider/authentication_provider.dart';
 import 'package:voter_app/utility/toast.dart';
 
 class VoteChoiceProvider with ChangeNotifier {
@@ -15,16 +19,15 @@ class VoteChoiceProvider with ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
-  Future<bool> reloadVoteChoice() async {
+  Future<bool> reloadVoteChoice(BuildContext context) async {
     _isLoading = true;
     notifyListeners();
     try {
-      // throw "TEST";
-      //TODO fetch new data and replace whole list
-      await Future.delayed(Duration(seconds: 2));
-      _voteChoiceList = _generateMockVoteChoices();
+      final authProvider =
+          Provider.of<AuthenticationProvider>(context, listen: false);
+      final token = await authProvider.getToken();
+      _voteChoiceList = await getVoteList(token);
       _voteChoiceList.sort((a, b) => b.voteCount - a.voteCount);
-      //TODO make it pagination instead of whole list
     } catch (e) {
       Toaster.error("Unable to load vote. Please try again later");
       return false;
@@ -51,17 +54,22 @@ class VoteChoiceProvider with ChangeNotifier {
     return voteChoices;
   }
 
-  Future<bool> voteFor(VoteChoice voteChoice) async {
+  Future<bool> voteFor(BuildContext context, VoteChoice voteChoice) async {
     try {
       var voteId = voteChoice.id;
       var targetVoteChoice =
           _voteChoiceList.firstWhere((element) => element.id == voteId);
-      //TODO send actual request to update vote on server
-      await Future.delayed(Duration(seconds: 2));
+      final authProvider =
+          Provider.of<AuthenticationProvider>(context, listen: false);
+      final token = await authProvider.getToken();
+      await sendVoteFor(token, voteId);
       targetVoteChoice.voteCount++;
       _voteChoiceList.sort((a, b) => b.voteCount - a.voteCount);
       notifyListeners();
       return true;
+    } on DuplicateVoteException catch (_) {
+      Toaster.error("Unable to vote. You have already cast your vote.");
+      return false;
     } catch (e) {
       Toaster.error("Unable to vote. Please try again later");
       return false;

@@ -1,7 +1,7 @@
-class InvalidLoginException implements Exception {
+class UnauthorizedException implements Exception {
   final String message;
 
-  InvalidLoginException(this.message);
+  UnauthorizedException(this.message);
 
   @override
   String toString() => message;

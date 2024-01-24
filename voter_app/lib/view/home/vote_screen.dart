@@ -35,7 +35,7 @@ class _VoteScreenState extends State<VoteScreen> {
   Future<bool> _onVoteChoiceConfirm(VoteChoice voteChoice) async {
     var voteChoiceProvider =
         Provider.of<VoteChoiceProvider>(context, listen: false);
-    return voteChoiceProvider.voteFor(voteChoice);
+    return voteChoiceProvider.voteFor(context, voteChoice);
   }
 
   @override
@@ -89,7 +89,7 @@ class _VoteScreenState extends State<VoteScreen> {
     return RefreshIndicator(
         key: _refreshIndicatorKey,
         onRefresh: () async {
-          await voteChoiceProvider.reloadVoteChoice();
+          await voteChoiceProvider.reloadVoteChoice(context);
         },
         child: Container(
             color: const Color.fromARGB(255, 238, 238, 238),

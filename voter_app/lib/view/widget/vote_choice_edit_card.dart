@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:voter_app/model/vote_choice.dart';
 import 'package:voter_app/provider/vote_choice_provider.dart';
 import 'package:voter_app/view/widget/dialog/delete_vote_dialog.dart';
 import 'package:voter_app/view/widget/dialog/unable_to_edit_vote_dialog.dart';

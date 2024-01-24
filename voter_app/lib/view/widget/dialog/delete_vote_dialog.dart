@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:voter_app/utility/toast.dart';
 
 import '../../../model/vote_choice.dart';
 
