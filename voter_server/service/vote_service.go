@@ -4,6 +4,9 @@ import (
 	"errors"
 	"github.com/tanaponpiti/voter/voter_server/model"
 	"github.com/tanaponpiti/voter/voter_server/repository"
+	"github.com/tanaponpiti/voter/voter_server/response"
+	"go.mongodb.org/mongo-driver/mongo"
+	"net/http"
 	"sort"
 	"sync"
 )
@@ -64,32 +67,79 @@ func GetAllVote() (voteWithScoreList []model.VoteWithScore, err error) {
 		voteWithScoreList = append(voteWithScoreList, voteWithScore)
 	}
 	sort.Slice(voteWithScoreList, func(i, j int) bool {
-		return voteWithScoreList[i].Score < voteWithScoreList[j].Score
+		return voteWithScoreList[j].Score < voteWithScoreList[i].Score
 	})
 	return voteWithScoreList, nil
 }
 
+func CreateVoteChoice(insertData model.VoteChoiceInsertData) (err error) {
+	_, err = repository.VoteChoiceRepositoryInstance.InsertVoteChoice(insertData)
+	if err != nil {
+		var mongoWriteException mongo.WriteException
+		if errors.As(err, &mongoWriteException) {
+			for _, err := range mongoWriteException.WriteErrors {
+				if err.Code == 11000 { // 11000 is the error code for duplicate key error in MongoDB
+					return response.NewErrorResponse("a vote choice with the same name already exists", http.StatusConflict)
+				}
+			}
+		}
+		return response.NewErrorResponse("failed to create the vote choice", http.StatusInternalServerError)
+	}
+	return nil
+}
+
 func EditVoteChoice(voteChoiceId string, data model.VoteChoiceUpdateData) (err error) {
-	choice, err := repository.VoteChoiceRepositoryInstance.GetSingleVoteChoice(voteChoiceId)
+	_, err = getVoteChoice(voteChoiceId)
 	if err != nil {
 		return err
 	}
-	score, err := repository.VoteLogRepositoryInstance.CountVoteLogByVoteId(choice.ID.Hex())
+	score, err := countVoteScore(voteChoiceId)
 	if err != nil {
 		return err
 	}
 	if score > 0 {
-		return errors.New("cannot edit vote choice that already have score")
+		return response.NewErrorResponse("cannot edit vote choice that already have score", http.StatusConflict)
 	}
-	return repository.VoteChoiceRepositoryInstance.UpdateVoteChoice(voteChoiceId, data)
+	err = repository.VoteChoiceRepositoryInstance.UpdateVoteChoice(voteChoiceId, data)
+	if err != nil {
+		var mongoWriteException mongo.WriteException
+		if errors.As(err, &mongoWriteException) {
+			for _, err := range mongoWriteException.WriteErrors {
+				if err.Code == 11000 { // 11000 is the error code for duplicate key error in MongoDB
+					return response.NewErrorResponse("a vote choice with the same name already exists", http.StatusConflict)
+				}
+			}
+		}
+		return response.NewErrorResponse("failed to update the vote choice", http.StatusInternalServerError)
+	}
+	return nil
+}
+
+func getVoteChoice(voteChoiceId string) (voteChoice *model.VoteChoice, err error) {
+	choice, err := repository.VoteChoiceRepositoryInstance.GetSingleVoteChoice(voteChoiceId)
+	if err != nil {
+		return nil, response.NewErrorResponse("unable to find vote choice", http.StatusInternalServerError)
+	}
+	if choice == nil {
+		return nil, response.NewErrorResponse("vote choice not found", http.StatusNotFound)
+	}
+	return choice, nil
+}
+
+func countVoteScore(voteChoiceId string) (score int, err error) {
+	score, err = repository.VoteLogRepositoryInstance.CountVoteLogByVoteId(voteChoiceId)
+	if err != nil {
+		return 0, response.NewErrorResponse("unable to find vote score of given vote choice", http.StatusInternalServerError)
+	}
+	return score, nil
 }
 
 func DeleteVoteChoice(voteChoiceId string) (err error) {
-	choice, err := repository.VoteChoiceRepositoryInstance.GetSingleVoteChoice(voteChoiceId)
+	_, err = getVoteChoice(voteChoiceId)
 	if err != nil {
 		return err
 	}
-	score, err := repository.VoteLogRepositoryInstance.CountVoteLogByVoteId(choice.ID.Hex())
+	score, err := countVoteScore(voteChoiceId)
 	if err != nil {
 		return err
 	}
@@ -97,4 +147,24 @@ func DeleteVoteChoice(voteChoiceId string) (err error) {
 		return errors.New("cannot delete vote choice that already have score")
 	}
 	return repository.VoteChoiceRepositoryInstance.DeleteVoteChoice(voteChoiceId)
+}
+
+func VoteFor(voterId string, voteChoiceId string) (err error) {
+	//check if given voterId already vote or not
+	user, err := repository.UserRepositoryInstance.GetUser(voterId)
+	if err != nil {
+		return response.NewErrorResponse("unable to find user for vote", http.StatusBadRequest)
+	}
+	voteLog, err := repository.VoteLogRepositoryInstance.GetVoteLogByUserId(user.ID.Hex())
+	if err != nil {
+		return response.NewErrorResponse("unable to get vote log for user", http.StatusInternalServerError)
+	}
+	if voteLog != nil {
+		return response.NewErrorResponse("user has already vote", http.StatusConflict)
+	}
+	_, err = repository.VoteLogRepositoryInstance.InsertVoteLog(model.VoteLog{VoteId: voteChoiceId, VoterUserId: voterId})
+	if err != nil {
+		return response.NewErrorResponse("unable to vote", http.StatusInternalServerError)
+	}
+	return nil
 }

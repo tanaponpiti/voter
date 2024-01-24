@@ -1,12 +1,10 @@
 package controller
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/tanaponpiti/voter/voter_server/model"
-	"github.com/tanaponpiti/voter/voter_server/repository"
+	"github.com/tanaponpiti/voter/voter_server/response"
 	"github.com/tanaponpiti/voter/voter_server/service"
-	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 )
 
@@ -26,18 +24,9 @@ func CreateVoteChoices(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	_, err := repository.VoteChoiceRepositoryInstance.InsertVoteChoice(insertData)
-	if err != nil {
-		var mongoWriteException mongo.WriteException
-		if errors.As(err, &mongoWriteException) {
-			for _, err := range mongoWriteException.WriteErrors {
-				if err.Code == 11000 { // 11000 is the error code for duplicate key error in MongoDB
-					c.JSON(http.StatusConflict, gin.H{"error": "A vote choice with the same name already exists"})
-					return
-				}
-			}
-		}
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create the vote choice"})
+	err := service.CreateVoteChoice(insertData)
+	complete := response.HandleErrorResponse(err, c)
+	if complete {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Vote choice created successfully"})
@@ -55,17 +44,8 @@ func UpdateVoteChoice(c *gin.Context) {
 		return
 	}
 	err := service.EditVoteChoice(voteChoiceId, updateData)
-	if err != nil {
-		var mongoWriteException mongo.WriteException
-		if errors.As(err, &mongoWriteException) {
-			for _, err := range mongoWriteException.WriteErrors {
-				if err.Code == 11000 { // 11000 is the error code for duplicate key error in MongoDB
-					c.JSON(http.StatusConflict, gin.H{"error": "A vote choice with the same name already exists"})
-					return
-				}
-			}
-		}
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to update the vote choice"})
+	complete := response.HandleErrorResponse(err, c)
+	if complete {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Vote choice updated successfully"})
@@ -78,13 +58,33 @@ func DeleteVoteChoice(c *gin.Context) {
 		return
 	}
 	err := service.DeleteVoteChoice(voteChoiceId)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete the vote choice"})
+	complete := response.HandleErrorResponse(err, c)
+	if complete {
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Vote choice deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Vote choice updated successfully"})
 }
 
 func Vote(c *gin.Context) {
-	// Handler logic here...
+	voteChoiceId := c.Param("voteChoiceId")
+	if voteChoiceId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "voteChoiceId is required"})
+		return
+	}
+	userId, exist := c.Get("userId")
+	if !exist {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	userIdStr, ok := userId.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	err := service.VoteFor(userIdStr, voteChoiceId)
+	complete := response.HandleErrorResponse(err, c)
+	if complete {
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Vote successfully"})
 }

@@ -16,6 +16,6 @@ type VoteLog struct {
 }
 
 type VoteScoreSummary struct {
-	VoteId    string `bson:"voteId"`
-	VoteScore int    `bson:"voteScore"`
+	VoteId    string `bson:"vote_id"`
+	VoteScore int    `bson:"vote_score"`
 }

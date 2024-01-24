@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"github.com/tanaponpiti/voter/voter_server/config"
 	"github.com/tanaponpiti/voter/voter_server/database"
 	"github.com/tanaponpiti/voter/voter_server/model"
@@ -82,6 +83,21 @@ func (r *VoteLogRepository) GetAllVoteLogs() ([]model.VoteLog, error) {
 	return voteLogs, nil
 }
 
+func (r *VoteLogRepository) GetVoteLogByUserId(userId string) (*model.VoteLog, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	filter := bson.M{"voter_user_id": userId}
+	var voteLog model.VoteLog
+	err := r.collection.FindOne(ctx, filter).Decode(&voteLog)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &voteLog, nil
+}
+
 func (r *VoteLogRepository) CountVoteLogByVoteId(voteId string) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -112,17 +128,17 @@ func (r *VoteLogRepository) AggregateVoteScores() ([]model.VoteScoreSummary, err
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	pipeline := mongo.Pipeline{
-		{
-			{"$group", bson.M{
-				"_id": "$VoteId",
-				"voteScore": bson.M{
-					"$sum": 1,
-				},
+		bson.D{
+			{"$group", bson.D{
+				{"_id", "$vote_id"},
+				{"vote_score", bson.D{{"$sum", 1}}},
 			}},
 		},
-		{
-			{"$sort", bson.M{
-				"voteScore": -1,
+		bson.D{
+			{"$project", bson.D{
+				{"_id", 0},
+				{"vote_id", "$_id"},
+				{"vote_score", 1},
 			}},
 		},
 	}
