@@ -49,6 +49,46 @@ class VoteChoice {
   }
 }
 
+class VoteChoiceCreate {
+  String name;
+  String? description;
+
+  VoteChoiceCreate({
+    required this.name,
+    this.description,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'description': description,
+    };
+  }
+
+  factory VoteChoiceCreate.fromJson(Map<String, dynamic> map) {
+    return VoteChoiceCreate(
+      name: map['Name'],
+      description: map['Description'],
+    );
+  }
+
+  VoteChoiceCreate copyWith({
+    String? id,
+    String? name,
+    String? description,
+  }) {
+    return VoteChoiceCreate(
+      name: name ?? this.name,
+      description: description ?? this.description,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'VoteChoiceEdit{name: $name, description: $description}';
+  }
+}
+
 class VoteChoiceEdit {
   final String id;
   String? name;

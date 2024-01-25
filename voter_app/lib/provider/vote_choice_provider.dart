@@ -15,6 +15,7 @@ class VoteChoiceProvider with ChangeNotifier {
   bool _isInitialized = false;
   bool _isLoading = false;
 
+
   bool get isInitialized => _isInitialized;
 
   bool get isLoading => _isLoading;
@@ -126,6 +127,27 @@ class VoteChoiceProvider with ChangeNotifier {
       return false;
     } catch (e) {
       Toaster.error("Unable to delete vote. Please try again later");
+      return false;
+    }
+  }
+
+  Future<bool> createVote(
+      BuildContext context, VoteChoiceCreate voteChoiceCreate) async {
+    final authProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
+    final token = await authProvider.getToken();
+    try {
+      await sendCreateVote(token, voteChoiceCreate);
+      await reloadVoteChoice(context);
+      return true;
+    } on DuplicateVoteException catch (_) {
+      await reloadVoteChoice(context);
+      return false;
+    } on UnauthorizedException catch (_) {
+      await authProvider.logout();
+      return false;
+    } catch (e) {
+      Toaster.error("Unable to create vote. Please try again later");
       return false;
     }
   }

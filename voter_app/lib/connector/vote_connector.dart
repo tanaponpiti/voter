@@ -46,7 +46,9 @@ Future<void> sendEditVote(String token, VoteChoiceEdit voteChoice) async {
       APIConstants.baseUrl + APIConstants.voteEndpoint + "/" + voteChoice.id;
   final response = await http.put(
     Uri.parse(apiUrl),
-    headers: generateAuthHeaders(token),
+    headers: generateAuthHeaders(token, {
+      'Content-Type': 'application/json; charset=UTF-8',
+    }),
     body: jsonEncode(<String, String?>{
       'name': voteChoice.name,
       'description': voteChoice.description,
@@ -60,6 +62,31 @@ Future<void> sendEditVote(String token, VoteChoiceEdit voteChoice) async {
     throw DuplicateVoteException("unable to edit vote that already have score");
   } else {
     throw Exception("unable to edit vote, please try again later");
+  }
+}
+
+Future<void> sendCreateVote(String token, VoteChoiceCreate voteChoice) async {
+  String apiUrl = APIConstants.baseUrl + APIConstants.voteEndpoint +"/";
+  final response = await http.post(
+    Uri.parse(apiUrl),
+    headers: generateAuthHeaders(token, {
+      'Content-Type': 'application/json; charset=UTF-8',
+    }),
+    body: jsonEncode(<String, String?>{
+      'name': voteChoice.name,
+      'description': voteChoice.description,
+    }),
+  );
+  if (response.statusCode == 200) {
+    return null;
+  } else if (response.statusCode == 401) {
+    throw UnauthorizedException(
+        "unable to create vote, token might be expired");
+  } else if (response.statusCode == 409) {
+    throw DuplicateVoteException(
+        "unable to create vote that already have same name");
+  } else {
+    throw Exception("unable to create vote, please try again later");
   }
 }
 

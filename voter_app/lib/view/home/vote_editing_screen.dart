@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:voter_app/model/vote_choice.dart';
 import 'package:voter_app/provider/vote_choice_provider.dart';
 import 'package:voter_app/view/widget/dialog/unable_to_edit_vote_dialog.dart';
+import 'package:voter_app/view/widget/dialog/vote_creating_dialog.dart';
 import 'package:voter_app/view/widget/dialog/vote_editing_dialog.dart';
 import 'package:voter_app/view/widget/vote_choice_edit_card.dart';
 import 'package:voter_app/view/widget/vote_choice_empty.dart';
@@ -37,6 +38,20 @@ class _VoteEditingScreenState extends State<VoteEditingScreen> {
                 voteChoice: voteChoice, onChoiceVote: _onEditConfirm);
           });
     }
+  }
+
+  Future<bool> _onCreateConfirm(VoteChoiceCreate voteChoiceCreate) async {
+    var voteChoiceProvider =
+        Provider.of<VoteChoiceProvider>(context, listen: false);
+    return voteChoiceProvider.createVote(context, voteChoiceCreate);
+  }
+
+  _openVoteCreateDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return VoteCreatingDialog(onVoteCreate: _onCreateConfirm);
+        });
   }
 
   Future<bool> _onEditConfirm(VoteChoiceEdit voteChoice) async {
@@ -80,9 +95,7 @@ class _VoteEditingScreenState extends State<VoteEditingScreen> {
 
   Widget _buildEmptyVotingList(BuildContext context) {
     return VoteChoiceEmpty(onCreateNewChoiceTap: () {
-      // Navigator.of(context).push(
-      //   MaterialPageRoute(builder: (context) => const SecondRoute()),
-      // );
+      _openVoteCreateDialog(context);
     });
   }
 
@@ -107,7 +120,9 @@ class _VoteEditingScreenState extends State<VoteEditingScreen> {
                         context, constraints, voteChoiceProvider)));
       }),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          _openVoteCreateDialog(context);
+        },
         child: const Icon(Icons.add),
       ),
     );
