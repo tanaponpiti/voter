@@ -39,10 +39,11 @@ class _VoteEditingScreenState extends State<VoteEditingScreen> {
     }
   }
 
-  Future<bool> _onEditConfirm(VoteChoice voteChoice) async {
+  Future<bool> _onEditConfirm(VoteChoiceEdit voteChoice) async {
     var voteChoiceProvider =
         Provider.of<VoteChoiceProvider>(context, listen: false);
-    return voteChoiceProvider.editVote(voteChoice);
+
+    return voteChoiceProvider.editVote(context, voteChoice);
   }
 
   @override
@@ -105,10 +106,8 @@ class _VoteEditingScreenState extends State<VoteEditingScreen> {
                     : _buildVotingList(
                         context, constraints, voteChoiceProvider)));
       }),
-      floatingActionButton:  FloatingActionButton(
-        onPressed: () {
-
-        },
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
         child: const Icon(Icons.add),
       ),
     );

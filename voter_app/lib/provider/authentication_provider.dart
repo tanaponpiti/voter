@@ -47,6 +47,8 @@ class AuthenticationProvider with ChangeNotifier {
     try {
       final token = await getToken();
       await logoutUser(token);
+    } catch (_) {
+      //Do nothing when there is no token or cannot remove token from server
     } finally {
       await storageService.delete("token");
       _isLoggedIn = false;

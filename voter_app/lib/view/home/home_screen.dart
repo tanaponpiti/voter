@@ -4,6 +4,7 @@ import 'package:voter_app/model/user.dart';
 import 'package:voter_app/provider/authentication_provider.dart';
 import 'package:voter_app/view/home/setting_screen.dart';
 import 'package:voter_app/view/home/vote_screen.dart';
+import 'package:voter_app/view/login/login_screen.dart';
 import 'package:voter_app/view/widget/home_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -29,6 +30,24 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedMenu = menu;
     });
   }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final authProvider = Provider.of<AuthenticationProvider>(context);
+    // If the user is not logged in, navigate to the login page.
+    if (!authProvider.isLoggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && ModalRoute.of(context)?.isCurrent == true) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+                (Route<dynamic> route) => false,
+          );
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthenticationProvider>(context);
@@ -36,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0.0,
-        title:  Row(
+        title: Row(
           children: [
             CircleAvatar(
               child: Text(

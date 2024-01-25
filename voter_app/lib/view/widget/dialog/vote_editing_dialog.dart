@@ -3,9 +3,10 @@ import '../../../model/vote_choice.dart';
 
 class VoteEditingDialog extends StatefulWidget {
   final VoteChoice voteChoice;
-  final Function(VoteChoice)? onChoiceVote;
+  final Function(VoteChoiceEdit)? onChoiceVote;
 
-  const VoteEditingDialog({super.key, required this.voteChoice, this.onChoiceVote});
+  const VoteEditingDialog(
+      {super.key, required this.voteChoice, this.onChoiceVote});
 
   @override
   State<VoteEditingDialog> createState() => _VoteEditingDialogState();
@@ -20,7 +21,8 @@ class _VoteEditingDialogState extends State<VoteEditingDialog> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.voteChoice.name);
-    _descriptionController = TextEditingController(text: widget.voteChoice.description);
+    _descriptionController =
+        TextEditingController(text: widget.voteChoice.description);
   }
 
   @override
@@ -65,18 +67,28 @@ class _VoteEditingDialogState extends State<VoteEditingDialog> {
           ),
           actions: <Widget>[
             TextButton(
-              child: _loading ? const CircularProgressIndicator() : const Text('Save'),
+              child: _loading
+                  ? const CircularProgressIndicator()
+                  : const Text('Save'),
               onPressed: () async {
                 try {
                   setState(() {
                     _loading = true;
                   });
-                  widget.voteChoice.name = _nameController.text;
-                  widget.voteChoice.description = _descriptionController.text;
+                  final voteEdit = VoteChoiceEdit(id: widget.voteChoice.id);
+                  if (widget.voteChoice.name != _nameController.text) {
+                    widget.voteChoice.name = _nameController.text;
+                    voteEdit.name = _nameController.text;
+                  }
+                  if (widget.voteChoice.description !=
+                      _descriptionController.text) {
+                    widget.voteChoice.description = _descriptionController.text;
+                    voteEdit.description = _descriptionController.text;
+                  }
                   var callback = widget.onChoiceVote;
                   var success = false;
                   if (callback != null) {
-                    success = await callback(widget.voteChoice);
+                    success = await callback(voteEdit);
                   }
                   if (success) {
                     if (!context.mounted) return;

@@ -22,12 +22,15 @@ class VoteChoiceProvider with ChangeNotifier {
   Future<bool> reloadVoteChoice(BuildContext context) async {
     _isLoading = true;
     notifyListeners();
+    final authProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
     try {
-      final authProvider =
-          Provider.of<AuthenticationProvider>(context, listen: false);
       final token = await authProvider.getToken();
       _voteChoiceList = await getVoteList(token);
       _voteChoiceList.sort((a, b) => b.voteCount - a.voteCount);
+    } on UnauthorizedException catch (_) {
+      await authProvider.logout();
+      return false;
     } catch (e) {
       Toaster.error("Unable to load vote. Please try again later");
       return false;
@@ -55,18 +58,21 @@ class VoteChoiceProvider with ChangeNotifier {
   }
 
   Future<bool> voteFor(BuildContext context, VoteChoice voteChoice) async {
+    final authProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
+    final token = await authProvider.getToken();
     try {
       var voteId = voteChoice.id;
       var targetVoteChoice =
           _voteChoiceList.firstWhere((element) => element.id == voteId);
-      final authProvider =
-          Provider.of<AuthenticationProvider>(context, listen: false);
-      final token = await authProvider.getToken();
       await sendVoteFor(token, voteId);
       targetVoteChoice.voteCount++;
       _voteChoiceList.sort((a, b) => b.voteCount - a.voteCount);
       notifyListeners();
       return true;
+    } on UnauthorizedException catch (_) {
+      await authProvider.logout();
+      return false;
     } on DuplicateVoteException catch (_) {
       Toaster.error("Unable to vote. You have already cast your vote.");
       return false;
@@ -76,33 +82,50 @@ class VoteChoiceProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> editVote(VoteChoice voteChoice) async {
+  Future<bool> editVote(
+      BuildContext context, VoteChoiceEdit voteChoiceEdit) async {
+    final authProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
+    final token = await authProvider.getToken();
     try {
-      var voteId = voteChoice.id;
+      var voteId = voteChoiceEdit.id;
       var targetVoteChoice =
           _voteChoiceList.firstWhere((element) => element.id == voteId);
-      //TODO send actual request to update vote on server
-      await Future.delayed(Duration(seconds: 2));
-      targetVoteChoice.name = voteChoice.name;
-      targetVoteChoice.description = voteChoice.description;
+      await sendEditVote(token, voteChoiceEdit);
+      final editedName = voteChoiceEdit.name;
+      if (editedName != null) {
+        targetVoteChoice.name = editedName;
+      }
+      final editedDescription = voteChoiceEdit.name;
+      if (editedDescription != null) {
+        targetVoteChoice.description = editedDescription;
+      }
       notifyListeners();
       return true;
+    } on UnauthorizedException catch (_) {
+      await authProvider.logout();
+      return false;
     } catch (e) {
-      Toaster.error("Unable to vote. Please try again later");
+      Toaster.error("Unable to edit vote. Please try again later");
       return false;
     }
   }
 
-  Future<bool> deleteVote(VoteChoice voteChoice) async {
+  Future<bool> deleteVote(BuildContext context, VoteChoice voteChoice) async {
+    final authProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
+    final token = await authProvider.getToken();
     try {
       var voteId = voteChoice.id;
+      await sendDeleteVote(token, voteId);
       _voteChoiceList.removeWhere((element) => element.id == voteId);
-      //TODO send actual request to update vote on server
-      await Future.delayed(Duration(seconds: 2));
       notifyListeners();
       return true;
+    } on UnauthorizedException catch (_) {
+      await authProvider.logout();
+      return false;
     } catch (e) {
-      Toaster.error("Unable to vote. Please try again later");
+      Toaster.error("Unable to delete vote. Please try again later");
       return false;
     }
   }

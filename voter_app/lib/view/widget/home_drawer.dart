@@ -65,15 +65,6 @@ class _HomeDrawerState extends State<HomeDrawer> {
                 final authProvider =
                     Provider.of<AuthenticationProvider>(context, listen: false);
                 await authProvider.logout();
-                if (mounted && ModalRoute.of(context)?.isCurrent == true) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
-                      // settings: const RouteSettings(name: LoginScreen.id)
-                    ),
-                  );
-                }
               },
             ),
           ),

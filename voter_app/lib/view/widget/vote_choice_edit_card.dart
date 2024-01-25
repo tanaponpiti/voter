@@ -26,8 +26,11 @@ class VoteChoiceEditCard extends VoteChoiceCard {
         context: context,
         builder: (BuildContext context) {
           return DeleteVoteDialog(
-              voteChoice: super.voteChoice,
-              onDeleteVote: voteProvider.deleteVote);
+            voteChoice: super.voteChoice,
+            onDeleteVote: (voteChoice) async {
+              return voteProvider.deleteVote(context, voteChoice);
+            },
+          );
         });
   }
 
