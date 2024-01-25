@@ -12,13 +12,16 @@ class VoteChoiceProvider with ChangeNotifier {
 
   List<VoteChoice> get voteChoiceList => _voteChoiceList;
 
+  String? _userVoteId = null;
+
   bool _isInitialized = false;
   bool _isLoading = false;
-
 
   bool get isInitialized => _isInitialized;
 
   bool get isLoading => _isLoading;
+
+  String? get userVoteId => _userVoteId;
 
   Future<bool> reloadVoteChoice(BuildContext context) async {
     _isLoading = true;
@@ -28,6 +31,7 @@ class VoteChoiceProvider with ChangeNotifier {
     try {
       final token = await authProvider.getToken();
       _voteChoiceList = await getVoteList(token);
+      _userVoteId = await getUserVote(token);
       _voteChoiceList.sort((a, b) => b.voteCount - a.voteCount);
     } on UnauthorizedException catch (_) {
       await authProvider.logout();
@@ -67,8 +71,10 @@ class VoteChoiceProvider with ChangeNotifier {
       var targetVoteChoice =
           _voteChoiceList.firstWhere((element) => element.id == voteId);
       await sendVoteFor(token, voteId);
-      targetVoteChoice.voteCount++;
-      _voteChoiceList.sort((a, b) => b.voteCount - a.voteCount);
+      await reloadVoteChoice(context);
+      // _userVoteId = voteId;
+      // targetVoteChoice.voteCount++;
+      // _voteChoiceList.sort((a, b) => b.voteCount - a.voteCount);
       notifyListeners();
       return true;
     } on UnauthorizedException catch (_) {
@@ -148,6 +154,44 @@ class VoteChoiceProvider with ChangeNotifier {
       return false;
     } catch (e) {
       Toaster.error("Unable to create vote. Please try again later");
+      return false;
+    }
+  }
+
+  Future<bool> deleteAllVoteScore(BuildContext context) async {
+    final authProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
+    final token = await authProvider.getToken();
+    try {
+      await sendClearAllScore(token);
+      _voteChoiceList.forEach((element) {
+        element.voteCount = 0;
+      });
+      notifyListeners();
+      return true;
+    } on UnauthorizedException catch (_) {
+      await authProvider.logout();
+      return false;
+    } catch (e) {
+      Toaster.error("Unable to delete vote score. Please try again later");
+      return false;
+    }
+  }
+
+  Future<bool> deleteAllVoteChoiceAndScore(BuildContext context) async {
+    final authProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
+    final token = await authProvider.getToken();
+    try {
+      await sendClearAllVote(token);
+      _voteChoiceList.clear();
+      notifyListeners();
+      return true;
+    } on UnauthorizedException catch (_) {
+      await authProvider.logout();
+      return false;
+    } catch (e) {
+      Toaster.error("Unable to delete all vote. Please try again later");
       return false;
     }
   }

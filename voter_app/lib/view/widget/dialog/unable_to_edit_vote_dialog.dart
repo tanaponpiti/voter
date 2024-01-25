@@ -23,7 +23,7 @@ class _UnableToEditVoteDialogState extends State<UnableToEditVoteDialog> {
         TextButton(
           child: const Text('Dismiss'),
           onPressed: () {
-            Navigator.of(context).pop(); // Dismiss the dialog
+            Navigator.of(context).pop();
           },
         ),
       ],

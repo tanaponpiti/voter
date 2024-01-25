@@ -5,12 +5,14 @@ class VoteChoiceCard extends StatelessWidget {
   final int index;
   final VoteChoice voteChoice;
   final Function(VoteChoice)? onChoiceTap;
+  final bool isVoted; // New variable
 
   const VoteChoiceCard(
       {super.key,
       required this.voteChoice,
       this.onChoiceTap,
-      required this.index});
+      required this.index,
+      this.isVoted = false});
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +24,10 @@ class VoteChoiceCard extends StatelessWidget {
                   padding: const EdgeInsets.all(10.0),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isVoted ? Colors.blue.shade100 : Colors.transparent, // Blueish highlight if isVoted is true
+                      width: 5,
+                    ),
                   ),
                   child: Column(
                     children: [
@@ -33,7 +39,7 @@ class VoteChoiceCard extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.all(8.0),
                               decoration: BoxDecoration(
-                                color: Colors.grey[300],
+                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
@@ -50,7 +56,7 @@ class VoteChoiceCard extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.all(8.0),
                               decoration: BoxDecoration(
-                                color: Colors.grey[300],
+                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
@@ -70,7 +76,7 @@ class VoteChoiceCard extends StatelessWidget {
                           width: double.infinity,
                           padding: const EdgeInsets.all(8.0),
                           decoration: BoxDecoration(
-                            color: Colors.grey[300],
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
