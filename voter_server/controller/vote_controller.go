@@ -18,6 +18,31 @@ func GetAllVoteChoices(c *gin.Context) {
 	return
 }
 
+func GetUserVote(c *gin.Context) {
+	userId, exist := c.Get("userId")
+	if !exist {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	userIdStr, ok := userId.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	log, err := service.GetUserVoteLog(userIdStr)
+	complete := response.HandleErrorResponse(err, c)
+	if complete {
+		return
+	}
+	var voteId *string
+	if log != nil {
+		voteId = &log.VoteId
+	} else {
+		voteId = nil
+	}
+	c.JSON(http.StatusOK, gin.H{"VoteId": voteId})
+}
+
 func CreateVoteChoices(c *gin.Context) {
 	var insertData model.VoteChoiceInsertData
 	if err := c.ShouldBindJSON(&insertData); err != nil {
@@ -96,4 +121,13 @@ func DeleteAllVote(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "All vote deleted successfully"})
+}
+
+func DeleteVoteScore(c *gin.Context) {
+	err := service.DeleteVoteScore()
+	complete := response.HandleErrorResponse(err, c)
+	if complete {
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Vote score deleted successfully"})
 }

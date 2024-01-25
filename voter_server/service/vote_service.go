@@ -76,6 +76,14 @@ func GetAllVote() (voteWithScoreList []model.VoteWithScore, err error) {
 	}
 }
 
+func GetUserVoteLog(voterId string) (voteLog *model.VoteLog, err error) {
+	voteLog, err = repository.VoteLogRepositoryInstance.GetVoteLogByUserId(voterId)
+	if err != nil {
+		return nil, response.NewErrorResponse("unable to get vote log for user", http.StatusInternalServerError)
+	}
+	return voteLog, nil
+}
+
 func CreateVoteChoice(insertData model.VoteChoiceInsertData) (err error) {
 	_, err = repository.VoteChoiceRepositoryInstance.InsertVoteChoice(insertData)
 	if err != nil {
@@ -183,6 +191,14 @@ func DeleteAllVote() (err error) {
 	if err != nil {
 		return response.NewErrorResponse("failed to delete all vote choice", http.StatusInternalServerError)
 	}
+	err = DeleteVoteScore()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteVoteScore() (err error) {
 	_, err = repository.VoteLogRepositoryInstance.DeleteAllVoteLogs()
 	if err != nil {
 		return response.NewErrorResponse("failed to delete all vote log", http.StatusInternalServerError)
