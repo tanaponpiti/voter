@@ -1,3 +1,10 @@
+<div>
+<img src="/screenshot/Simulator%20Screenshot%20-%20iPhone%2015%20Pro%20Max%20-%202024-01-26%20at%2020.44.17.png" width="128"/>
+<img src="/screenshot/Simulator%20Screenshot%20-%20iPhone%2015%20Pro%20Max%20-%202024-01-26%20at%2020.44.22.png" width="128"/>
+<img src="/screenshot/Simulator%20Screenshot%20-%20iPhone%2015%20Pro%20Max%20-%202024-01-26%20at%2020.44.26.png" width="128"/>
+<img src="/screenshot/Simulator%20Screenshot%20-%20iPhone%2015%20Pro%20Max%20-%202024-01-26%20at%2020.44.37.png" width="128"/>
+</div>
+
 # Voter App - Backend Setup
 
 This guide will help you set up the Voter App Backend using Docker Compose. The setup includes a `voter_server` service and a `mongodb` service.
