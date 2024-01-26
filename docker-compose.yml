@@ -2,7 +2,7 @@ version: '3.1'
 
 services:
   voter_server:
-    image: ghcr.io/tanaponpiti/voter:latest
+    image: ghcr.io/tanaponpiti/voter:latest-amd64
     container_name: voter_server
     restart: unless-stopped
     environment:
