@@ -56,6 +56,8 @@ func main() {
 	}
 
 	router := gin.Default()
+	router.Static("/app", "./public/web")
+	router.StaticFile("/manifest.json", "./public/web/manifest.json")
 	apiGroup := router.Group("/api")
 	route.RegisterVoteChoiceRoutes(apiGroup)
 	route.RegisterAuthRoutes(apiGroup)
