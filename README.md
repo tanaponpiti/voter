@@ -63,8 +63,10 @@ The application's configuration is done through environment variables within the
     The voter application should now be accessible through your browser or API client at:
 
     ```
-    http://localhost:8080
+    http://localhost:8080/app
     ```
+    You will found web client version of voter app inside this path. However, this app was written in Flutter so using it on mobile device (iOS,Android) is more desirable. Observer next section to learn how to build and run them in next section.
+
 
 5. **View Logs**:
 
