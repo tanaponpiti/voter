@@ -18,10 +18,6 @@ import (
 	"testing"
 )
 
-func setEnv() {
-
-}
-
 func TestGenerateAndValidateToken(t *testing.T) {
 	err := os.Setenv("JWT_SECRET", "ji3ij1nm109aspa")
 	assert.Nil(t, err)

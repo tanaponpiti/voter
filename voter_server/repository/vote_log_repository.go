@@ -12,7 +12,17 @@ import (
 	"time"
 )
 
-var VoteLogRepositoryInstance *VoteLogRepository
+type IVoteLogRepository interface {
+	EnsureVoteLogIndex() error
+	InsertVoteLog(vc model.VoteLog) (*mongo.InsertOneResult, error)
+	GetAllVoteLogs() ([]model.VoteLog, error)
+	GetVoteLogByUserId(userId string) (*model.VoteLog, error)
+	CountVoteLogByVoteId(voteId string) (int, error)
+	DeleteAllVoteLogs() (int64, error)
+	AggregateVoteScores() ([]model.VoteScoreSummary, error)
+}
+
+var VoteLogRepositoryInstance IVoteLogRepository
 
 type VoteLogRepository struct {
 	collection *mongo.Collection

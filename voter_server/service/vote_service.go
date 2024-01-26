@@ -85,6 +85,9 @@ func GetUserVoteLog(voterId string) (voteLog *model.VoteLog, err error) {
 }
 
 func CreateVoteChoice(insertData model.VoteChoiceInsertData) (err error) {
+	if insertData.Name == "" {
+		return response.NewErrorResponse("the name of the vote choice cannot be empty", http.StatusBadRequest)
+	}
 	_, err = repository.VoteChoiceRepositoryInstance.InsertVoteChoice(insertData)
 	if err != nil {
 		var mongoWriteException mongo.WriteException

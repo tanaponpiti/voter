@@ -13,7 +13,18 @@ import (
 	"time"
 )
 
-var VoteChoiceRepositoryInstance *VoteChoiceRepository
+type IVoteChoiceRepository interface {
+	EnsureVoteChoiceIndex() error
+	InsertVoteChoice(vc model.VoteChoiceInsertData) (*mongo.InsertOneResult, error)
+	GetAllVoteChoices() ([]model.VoteChoice, error)
+	GetSingleVoteChoice(id string) (*model.VoteChoice, error)
+	GetVoteChoicesPage(pageSize int, pageNum int, name string, description string) ([]model.VoteChoice, int64, error)
+	UpdateVoteChoice(id string, updateData model.VoteChoiceUpdateData) error
+	DeleteVoteChoice(id string) error
+	DeleteAllVoteChoice() (int64, error)
+}
+
+var VoteChoiceRepositoryInstance IVoteChoiceRepository
 
 type VoteChoiceRepository struct {
 	collection *mongo.Collection
